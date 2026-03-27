@@ -1,72 +1,38 @@
 # Imaging QC Workflow
 
-This document summarizes how imaging QC was done for the Brains dataset, using the archived notes in `dataset-QC-workflow/histories`. It is meant to be a practical template for building a clean inclusion/exclusion list from a BIDS dataset without changing the raw BIDS archive itself.
+This document summarizes a template for building an analysis-ready clean imaging dataset from its BIDS curation. It documents QC experiences for cleaning the Brains dataset for demonstration. 
+
+<img src="./assets/plots/brains-qc-flow.png" alt="Brains dataset QC flow diagram" width="820"><br>
+
+`brains-qc-flow.png` illustrates the QC process applied to the Brains dataset and the resulting dataset at each QC stage.
 
 ## Starting file
 
-- Starting dataset: raw BIDS plus the modality-specific preprocessing outputs used for QC.
-- For Brains, the practical QC inputs were not just raw BIDS. They also included:
-  - `fmriprep` HTML reports and `figures/`
-  - FreeSurfer structural QC outputs
-  - study tracking notes
-  - REDCap exports
-  - the freeze inclusion ledger and derived QC tables
-
-<details>
-<summary>Brains-specific QC inputs</summary>
-
-- Study-wide inclusion ledger:
-  - `subjects_inclusion_FREEZE.csv`
-  - subject tracking workbook
-  - README-style study notes and session caveats
-- Structural QC inputs:
-  - `structural_file_usage_filtered.csv`
-  - `hippocampal_region_sums.csv`
-  - FreeSurfer QC PNGs / structural views in the `fmriprep` report
-- Functional QC inputs:
-  - `fmriprep` HTML reports
-  - BOLD/fieldmap distortion-correction views
-  - automated motion and signal metrics such as FD and tSNR
-
-</details>
+- Raw BIDS
+- Exclusion subject list (from clinical trial)
+- `fmriprep` HTML reports, BOLD/fieldmap distortion-correction views, and automated motion and signal metrics such as FD and tSNR (these can often be found in `figures/` from pipeline outputs)
+- FreeSurfer structural QC outputs and modality-specific derivatives
+- Study tracking notes (from study leads and staffs)
+- REDCap exports
 
 ## Output file
 
-- Keep the original BIDS dataset unchanged.
-- Write QC decisions to derived freeze artifacts and analysis tables.
+- Keep the original BIDS dataset unchanged (read-only!).
+- Write QC decisions to separate artifacts and analysis tables.
 - Minimum output:
-  - a clean subject-session inclusion/exclusion ledger
-  - explicit reasons for exclusion
-  - modality-specific QC notes when exclusions are image-based rather than clinic-based
-
-<details>
-<summary>Brains-specific outputs</summary>
-
-- Main inclusion ledger:
-  - `subjects_inclusion_FREEZE.csv`
-- Consolidated subject manifests:
-  - `subjects.json`
-  - `subjects.md`
-- Structural analysis outputs:
-  - `analysis/mainanalyses_struct_python/inclusion_flow.csv`
-  - `merged_demo.csv`
-  - `merged_demo_madrs.csv`
-- Important limitation:
-  - structural QC was codified as an executable freeze
-  - functional QC was documented and reviewed, but it was not yet mirrored by an equally complete scripted freeze package
-
-</details>
+  - a clean subject-session (at the single-sample level) inclusion/exclusion ledger (will be frozen prior to analysis starts)
+  - explicit reasons for exclusion (clearly state if exclusions are image-based or clinic-based)
 
 ## Clinic-based Inclusion/Exclusion Criteria
 
 - Apply non-imaging exclusions before image QC.
-- Record these in a subject-session ledger so later imaging exclusions do not overwrite the clinical history.
 - Common reasons:
   - withdrew from the study
   - did not meet trial requirements
   - ineligible per clinical review
   - session should not be analyzed based on study team notes
   - additional exceptions discovered from REDCap or after checking with study staff
+- Tips: Record these in a subject-session ledger so later imaging exclusions do not overwrite the clinical history.
 
 <details>
 <summary>How this was tracked in Brains</summary>
@@ -78,7 +44,7 @@ This document summarizes how imaging QC was done for the Brains dataset, using t
   - REDCap-derived information
   - imaging QC failures
 - The inclusion ledger and subject manifest were treated as the authoritative record of why a subject or session was kept or dropped.
-- Practical rule:
+- Tips:
   - do not collapse clinic-based and image-based exclusions into one vague label
   - keep the reason explicit so the final sample can be reproduced later
 
@@ -86,7 +52,7 @@ This document summarizes how imaging QC was done for the Brains dataset, using t
 
 ## Structural-Based Exclusion (QC)
 
-- Structural QC was done in two layers:
+- Structural QC was done in 2 parts:
   - manual review of structural processing quality
   - executable freeze rules used for the final structural analysis sample
 
@@ -97,9 +63,7 @@ This document summarizes how imaging QC was done for the Brains dataset, using t
 - Catastrophic alignment failures
 - Structural images that are so compromised that downstream registration cannot be trusted
 
-### Visual QC Reference
-
-Use the examples below as a compact guide for how to classify common structural cases in Brains.
+### Visual QC Examples
 
 <details open>
 <summary>Reject / Flag</summary>
@@ -139,7 +103,7 @@ Use the examples below as a compact guide for how to classify common structural 
       <img src="./assets/qc-thumbs/ok7.png" alt="Additional structural examples that can falsely appear to be bad" width="300"><br>
       <strong>Images that may falsely appear to be bad</strong><br>
       <strong>Verdict:</strong> Usually accept.<br>
-      Use anatomical context before failing scans around sulcal spaces, basal ganglia, hippocampus, or amygdala. `ok5.png` and `ok7.png` are both examples of views that can look wrong if judged slice-by-slice without considering the surrounding anatomy.
+      Use anatomical context before failing scans around sulcal spaces, basal ganglia, hippocampus, or amygdala. Above are both examples of views that can look wrong if judged slice-by-slice without considering the surrounding anatomy. For instance, the isolated circles on the right seem odd and potentially erroneous, but they are actually part of a normal sulcal space that persists across multiple slices in x, y and z.
     </td>
   </tr>
 </table>
@@ -174,69 +138,48 @@ Use the examples below as a compact guide for how to classify common structural 
 
 </details>
 
-### Common exclusion criteria used in Brains
 
-- For averaged structural images used in preprocessing:
-  - score on a 1-4 scale
-  - `3` or `4` = pass
-  - `1` or `2` = fail
-- For executable structural freeze construction:
-  - subject must first pass the structural file-usage gate
-  - session must pass automated QC: `EulerTotal < 100`
-  - session must not be in the manual exclusion list
-  - session may still be excluded if it was absent from the finalized historical structural freeze used for replication
-
+### Brains Structural QC 
 <details>
-<summary>Brains structural QC details</summary>
+<summary>Details</summary>
 
 - Manual rating scale from the archived Brains QC notes:
   - `1`: extremely poor processing; unusable for downstream alignment
   - `2`: sub-par image/alignment/surface with widespread errors
   - `3`: mostly good; minor deviations are exceptions
   - `4`: pristine image, template alignment, and surface reconstruction
-- Structural artifacts explicitly called out as true failures:
+- Structural artifacts identified as failures:
   - cortical ribbon far off the anatomy
   - poor temporal-lobe segmentation
   - catastrophic structural failures even if they do not match a canned example
-- Structural patterns explicitly called out as not automatic failures:
+- Structural patterns identified as not automatic failures:
   - midsagittal gaps between hemispheres
   - imperfect-looking basal ganglia / hippocampus / amygdala boundaries in this cortical QC view
   - small bubble-like sulcal spaces that are anatomically continuous across slices
   - Gibbs ringing, if gray/white boundary detection still looks good
-- Executable Brains structural freeze rules from `qc_workflow.md`:
+- Executable Brains structural QC rules:
+  - session must not be in the manual exclusion list, either clinic- or imaging-based
   - auto QC pass: `EulerTotal < 100`
-  - manual exclusions:
-    - `s018 ses-V4`
-    - `s019 ses-V4`
-    - `s019 ses-V5`
-    - `s019 ses-V6`
-    - `s019 ses-V7`
-    - `s040 ses-V7`
-    - `s044 ses-V4`
-    - `s051 ses-V8`
-  - analysis-matching exclusions (`R_STRUCT_ABSENT_KEYS`):
-    - `s019_ses-V9`
-    - `s034_ses-V10`
-    - `s035_ses-V9`
-    - `s040_ses-V6`
-    - `s045_ses-V6`
-    - `s045_ses-V9`
 
 </details>
 
 ### Helpful resources
 
-- `fmriprep` structural HTML report and `figures/`
-- FreeSurfer QC report images
-- `structural_file_usage_filtered.csv`
-- `hippocampal_region_sums.csv`
-- References used in the Brains QC notes for anatomy review:
-  - hippocampal labeling papers linked in the archived QC PDF
+- [Sherlock OnDemand](https://ondemand.sherlock.stanford.edu/)
+  Sherlock OnDemand. This was the main access point for downloading `fmriprep` reports, `figures/`, and other QC materials from the Brains project directories.
+- [MRI QC background paper](https://pmc.ncbi.nlm.nih.gov/articles/PMC3254728/)
+  Background reading on why MRI image-quality problems can create misleading findings and why QC matters so much for downstream inference.
+- [Gibbs artifact reference](https://mriquestions.com/gibbs-artifact.html)
+  MRIQuestions overview of Gibbs artifact / Gibbs ringing. Helpful when deciding whether visible ringing is severe enough to compromise gray/white boundary detection.
+- [Hippocampal labeling reference 1](https://pubs.rsna.org/doi/full/10.1148/rg.210153)
+  Hippocampal labeling reference suggested in the Brains QC notes for reviewing medial temporal lobe anatomy and avoiding false positives during structural QC.
+- [Hippocampal labeling reference 2](https://insightsimaging.springeropen.com/articles/10.1007/s13244-016-0541-2)
+  Additional hippocampal labeling / anatomy reference suggested in the Brains QC notes for checking whether odd-looking medial temporal segmentations are actually expected.
 
 ## Functional Imaging-Based Exclusion (QC)
 
 - Functional QC in Brains relied on both automated metrics and manual review.
-- Automated metrics such as FD and tSNR were considered useful for masking/censoring and for detecting poor scans.
+- Automated metrics such as FD (head motion) and tSNR (signal) were considered useful for masking/censoring and for detecting poor scans.
 - Manual QC was intentionally narrower: catch egregious failures that automated metrics could miss.
 
 ### What to exclude
@@ -245,9 +188,7 @@ Use the examples below as a compact guide for how to classify common structural 
 - Catastrophic susceptibility distortion correction errors
 - Scan/session combinations with severe functional problems that cannot be rescued by ordinary censoring or masking
 
-### Visual QC Reference
-
-The functional examples below all center on susceptibility distortion correction, which was the main manual QC target in Brains.
+### Visual QC Examples
 
 <details open>
 <summary>Reject / Fail</summary>
@@ -287,7 +228,10 @@ The functional examples below all center on susceptibility distortion correction
 
 </details>
 
-### Common exclusion criteria used in Brains
+
+### Brains Functional QC
+<details>
+<summary>Details</summary>
 
 - Review was binary rather than continuous:
   - pass if all functional scans for the subject passed review
@@ -296,42 +240,36 @@ The functional examples below all center on susceptibility distortion correction
   - session `V2-V10`
   - scan number `rs1-rs4`
 - Manual review focused especially on susceptibility distortion correction problems rather than trying to manually rate every small quality difference
-
-<details>
-<summary>Brains functional QC details</summary>
-
-- The archived Brains QC notes describe manual functional QC as a pass/fail screen for egregious errors.
-- Automated metrics named in the notes:
+- Automated metrics:
   - FD for head motion
   - tSNR for signal quality
 - The key Brains-specific functional issue was susceptibility distortion correction failure:
   - catastrophic failures occurred when BOLD images were encoded in `ARS` coordinates but fieldmaps were in `RPI`
   - subtler but still bad failures occurred when both BOLD and fieldmaps were encoded in `ARS`
   - distortion correction worked when both were correctly treated as `RPI`
-- Historical interpretation from the archived notes:
+- Technical issues:
   - all scans were acquired `RPI/RPI`
   - older `dcm2niix` versions sometimes mislabeled GE scanner data as `ARS`
   - because phase-encoding direction was interpreted relative to coordinates, this coordinate error caused bad distortion correction
-- Important workflow limitation:
-  - unlike structural QC, the current repo did not yet implement a full functional freeze with standardized file inventory, QC table, manual exclusion table, and inclusion-flow outputs
 
 </details>
 
 ### Helpful resources
 
-- `fmriprep` functional HTML reports
-- distortion-correction panels for BOLD/fieldmap alignment
-- FD and tSNR summaries
-- References linked in the archived Brains QC notes:
-  - susceptibility artifact background
-  - Sherlock OnDemand access instructions for report review
+- [Sherlock OnDemand](https://ondemand.sherlock.stanford.edu/)
+  Sherlock OnDemand. Used to access the Brains `fmriprep` HTML reports and associated `figures/` for manual BOLD QC.
+- [Susceptibility artifact reference](https://www.mriquestions.com/susceptibility-artifact.html)
+  MRIQuestions overview of susceptibility artifact. Useful background for understanding the type of frontal and inferior distortions the Brains functional QC was checking.
+- [FieldTrip coordinate-system FAQ](https://www.fieldtriptoolbox.org/faq/source/coordsys/)
+  FieldTrip coordinate-system FAQ. This is directly relevant to the Brains issue where BOLD and fieldmaps were mislabeled in `ARS` vs `RPI`, which then broke distortion correction.
 
-## Scanner- and Site-Dependent Artifacts
+## Additional Sanity Checks
+### Scanner- and Site-Dependent Artifacts
 
 - Always check whether site, scanner, conversion software, or protocol changes introduced systematic artifacts.
 - Do this before finalizing the analysis sample, and document the check in the freeze record.
 
-### What to verify
+#### What to verify
 
 - scanner vendor / model / upgrade timing
 - dcm2niix version or other DICOM-to-BIDS conversion changes
@@ -349,7 +287,7 @@ The functional examples below all center on susceptibility distortion correction
   - freeze a list of scans acquired before the upgrade
   - run the upgrade comparison on the already matched structural analysis sample, not on the raw full dataset
   - compare pre- vs post-upgrade effects with saved model summaries
-- Recommended QC actions based on the Brains workflow:
+- Tips:
   - keep a scanner-change log
   - track conversion software versions
   - verify orientation and distortion-correction behavior visually in reports
@@ -357,15 +295,29 @@ The functional examples below all center on susceptibility distortion correction
 
 </details>
 
-## Bottom Line
+### Timepoint Harmonization
 
-- In Brains, the cleanest workflow was:
+- Pair each imaging session with the correct clinical assessment and treatment timepoint.
+- This mattered because imaging, clinician ratings, self-report ratings, and TMS treatment did not always happen on the exact same calendar day.
+- Instead of assuming event labels were already synchronized, the workflow created an explicit date-alignment layer that could be audited later.
+
+<details>
+<summary>Visual QC of timepoint alignment</summary>
+
+<img src="./assets/plots/s015.png" alt="Subject-level timepoint alignment plot for sub-s015" width="760"><br>
+
+- Example: this plot illustrates event timepoints of patient `s015` from the Brains trial, whose baseline MADRS was evaluated 23 days after baseline neuroimaging visit.
+- Clinician notes explained: "patient became numb with medication dose increase during screening, elected to discontinue medication and then pursue treatment with us"
+- Tip: flag mismatched date assignments, missing date fields, and suspiciously large gaps between treatment, scan, and symptom assessment
+
+</details>
+
+## Summary
+
+- Basic workflow:
+  - preprocess and curate imaging data to BIDS organization
   - apply clinic-based inclusion/exclusion first
   - build a subject-session ledger
   - run structural QC with explicit automated and manual rules
   - run functional QC to catch egregious preprocessing failures, especially distortion-correction errors
-  - document scanner/software artifacts separately
-  - keep the final inclusion/exclusion reasons explicit and auditable
-- The main asymmetry to avoid in future datasets:
-  - structural QC was executable and reproducible
-  - functional QC was real and documented, but not yet standardized into the same kind of freeze tables
+  - QC additional sources of bias, such as scanner and software versioning, timestamp harmonization, etc.; document additional artifacts separately
