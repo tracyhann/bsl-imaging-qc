@@ -287,13 +287,26 @@ This document summarizes a template for building an analysis-ready clean imaging
   - freeze a list of scans acquired before the upgrade
   - run the upgrade comparison on the already matched structural analysis sample, not on the raw full dataset
   - compare pre- vs post-upgrade effects with saved model summaries
+
+<img src="./assets/plots/fmri-std-scanner-upgrade-artifacts.png" alt="fMRI standard-space scanner upgrade artifacts comparison plot" width="760"><br>
+
+- Example: this plot summarizes scanner-upgrade-related artifacts observed in standard-space fMRI outputs and can be used to document pre/post-upgrade sensitivity checks.
 - Tips:
-  - keep a scanner-change log
+  - keep a scanner-change log; stay up-to-date on facility announcements or news
   - track conversion software versions
   - verify orientation and distortion-correction behavior visually in reports
   - save an explicit pre/post-upgrade registry and sensitivity analysis
 
 </details>
+
+#### Helpful resources
+
+- [CNI Wiki main page](https://cni.su.domains/wiki/index.php?title=Main_Page)
+  CNI facility wiki with technical information for users, including getting started materials, troubleshooting, MR hardware and protocols, data access, and QA-related pages. This is a good first place to check for facility-specific procedures and documentation that may explain site-dependent artifacts.
+- [CNI facility news example: Scan Data Acquired From August 2-11](https://cni.su.domains/scan-data-acquired-from-august-2-11/)
+  CNI facility-news post from August 20, 2021 describing a coherent MR noise source that was ultimately traced to an environmental issue in the facility. This is a useful example of where site-dependent artifacts may be documented outside the imaging dataset itself.
+- [CNI facility news example: Scan Data Acquired From August 19-23](https://cni.su.domains/scan-data-acquired-from-august-19-23/)
+  CNI facility-news post from August 26, 2021 documenting the August 17-18, 2021 scanner upgrade and the post-upgrade artifact issue that affected some sequences. Useful for checking whether known upgrade windows overlap with acquisition dates in your study.
 
 ### Timepoint Harmonization
 
