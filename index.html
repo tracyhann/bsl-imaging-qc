@@ -252,6 +252,18 @@
       text-transform: uppercase;
     }
 
+    .sanity-subsection-title {
+      margin-top: 42px;
+      border-left: 7px solid var(--teal);
+      border-radius: 14px;
+      padding: 12px 16px;
+      color: var(--forest);
+      background:
+        linear-gradient(90deg, rgba(22, 123, 143, 0.12), rgba(255, 255, 255, 0));
+      font-size: clamp(1.65rem, 2.5vw, 2.15rem);
+      letter-spacing: -0.02em;
+    }
+
     .lead {
       position: relative;
       z-index: 1;
@@ -819,13 +831,13 @@
       <section id="sanity">
         <h2>Additional Sanity Checks</h2>
 
-        <h3>Scanner- and Site-Dependent Artifacts</h3>
+        <h3 class="sanity-subsection-title">Scanner- and Site-Dependent Artifacts</h3>
         <ul>
           <li>Always check whether site, scanner, conversion software, or protocol changes introduced systematic artifacts.</li>
           <li>Do this before finalizing the analysis sample, and document the check in the freeze record.</li>
         </ul>
 
-        <h4>What to verify</h4>
+        <h3>What to verify</h3>
         <ul>
           <li>scanner vendor / model / upgrade timing</li>
           <li>dcm2niix version or other DICOM-to-BIDS conversion changes</li>
@@ -867,7 +879,7 @@
           </ul>
         </details>
 
-        <h4>Helpful resources</h4>
+        <h3>Helpful resources</h3>
         <ul class="resource-list">
           <li><a href="https://cni.su.domains/wiki/index.php?title=Main_Page">CNI Wiki main page</a><br>
             CNI facility wiki with technical information for users, including getting started materials, troubleshooting, MR hardware and protocols, data access, and QA-related pages. This is a good first place to check for facility-specific procedures and documentation that may explain site-dependent artifacts.</li>
@@ -877,7 +889,7 @@
             CNI facility-news post from August 26, 2021 documenting the August 17-18, 2021 scanner upgrade and the post-upgrade artifact issue that affected some sequences. Useful for checking whether known upgrade windows overlap with acquisition dates in your study.</li>
         </ul>
 
-        <h3>Timepoint Harmonization</h3>
+        <h3 class="sanity-subsection-title">Timepoint Harmonization</h3>
         <ul>
           <li>Pair each imaging session with the correct clinical assessment and treatment timepoint.</li>
           <li>This mattered because imaging, clinician ratings, self-report ratings, and TMS treatment did not always happen on the exact same calendar day.</li>
