@@ -1,0 +1,932 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MRI QC Workflow</title>
+  <meta name="description" content="MRI QC Workflow rendered from dataset-QC-workflow/imaging-qc-workflow.md.">
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #14212b;
+      --muted: #526575;
+      --paper: #eef4f8;
+      --surface: #ffffff;
+      --surface-strong: #e7f2f8;
+      --line: #c7d7e4;
+      --forest: #0b3551;
+      --teal: #167b8f;
+      --gold: #4f86a8;
+      --coral: #b34a48;
+      --blue: #1167a8;
+      --shadow: 0 24px 70px rgba(17, 45, 68, 0.13);
+      --radius: 24px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at top left, rgba(22, 123, 143, 0.18), transparent 31rem),
+        radial-gradient(circle at 92% 8%, rgba(17, 103, 168, 0.18), transparent 28rem),
+        linear-gradient(135deg, #f6fbfe 0%, #edf5fa 44%, #f8fbfd 100%);
+      font-family: "IBM Plex Sans", "Aptos", "Helvetica Neue", "Segoe UI", Verdana, sans-serif;
+      font-size: 18px;
+      line-height: 1.7;
+    }
+
+    body::before {
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      pointer-events: none;
+      content: "";
+      opacity: 0.3;
+      background-image:
+        linear-gradient(rgba(17, 103, 168, 0.07) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(17, 103, 168, 0.07) 1px, transparent 1px);
+      background-size: 34px 34px;
+      mask-image: linear-gradient(to bottom, #000, transparent 78%);
+    }
+
+    a {
+      color: var(--blue);
+      font-weight: 800;
+      text-decoration-thickness: 0.08em;
+      text-underline-offset: 0.2em;
+    }
+
+    img {
+      display: block;
+      max-width: 100%;
+      height: auto;
+      border-radius: 18px;
+    }
+
+    code {
+      border: 1px solid rgba(23, 75, 63, 0.14);
+      border-radius: 8px;
+      padding: 0.12rem 0.38rem;
+      color: #0b3551;
+      background: rgba(231, 242, 248, 0.86);
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+      font-size: 0.92em;
+    }
+
+    .page {
+      width: min(1180px, calc(100% - 36px));
+      margin: 0 auto;
+      padding: 28px 0 64px;
+    }
+
+    .skip-link {
+      position: absolute;
+      left: 20px;
+      top: -80px;
+      z-index: 20;
+      border-radius: 999px;
+      padding: 10px 14px;
+      color: #fff;
+      background: var(--forest);
+      transition: top 160ms ease;
+    }
+
+    .skip-link:focus {
+      top: 20px;
+    }
+
+    .top-nav {
+      position: sticky;
+      top: 12px;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      margin-bottom: 28px;
+      border: 1px solid rgba(199, 215, 228, 0.9);
+      border-radius: 999px;
+      padding: 10px 12px 10px 18px;
+      background: rgba(255, 255, 255, 0.9);
+      box-shadow: 0 12px 40px rgba(17, 45, 68, 0.08);
+      backdrop-filter: blur(18px);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: max-content;
+      color: var(--forest);
+      font-weight: 900;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+    }
+
+    .brand-mark {
+      width: 18px;
+      height: 18px;
+      border-radius: 6px;
+      background:
+        linear-gradient(135deg, var(--forest) 0 45%, transparent 45%),
+        linear-gradient(315deg, var(--teal) 0 46%, #8fb7cb 46%);
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.46);
+    }
+
+    .nav-links {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 6px;
+    }
+
+    .nav-links a {
+      border-radius: 999px;
+      padding: 9px 12px;
+      color: var(--muted);
+      font-size: 0.94rem;
+      text-decoration: none;
+    }
+
+    .nav-links a:hover,
+    .nav-links a:focus {
+      color: #fff;
+      background: var(--forest);
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 0.95fr) minmax(320px, 0.8fr);
+      gap: 26px;
+      align-items: stretch;
+      margin-bottom: 30px;
+    }
+
+    .hero-copy,
+    .hero-card,
+    .content-card {
+      border: 1px solid rgba(199, 215, 228, 0.9);
+      background: rgba(255, 255, 255, 0.9);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(12px);
+    }
+
+    .hero-copy {
+      position: relative;
+      overflow: hidden;
+      border-radius: 34px;
+      padding: clamp(28px, 5vw, 58px);
+    }
+
+    .hero-copy::after {
+      position: absolute;
+      right: -90px;
+      bottom: -120px;
+      width: 270px;
+      height: 270px;
+      border: 42px solid rgba(22, 123, 143, 0.13);
+      border-radius: 50%;
+      content: "";
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin: 0 0 18px;
+      border: 1px solid rgba(17, 103, 168, 0.18);
+      border-radius: 999px;
+      padding: 6px 11px;
+      color: var(--forest);
+      background: rgba(231, 242, 248, 0.86);
+      font-size: 0.84rem;
+      font-weight: 900;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4 {
+      margin: 0;
+      color: var(--forest);
+      line-height: 1.1;
+    }
+
+    h1 {
+      max-width: 12ch;
+      font-family: "IBM Plex Sans Condensed", "Aptos Display", "Helvetica Neue", sans-serif;
+      font-size: clamp(3.2rem, 8vw, 6.9rem);
+      font-weight: 900;
+      letter-spacing: -0.06em;
+    }
+
+    h2 {
+      margin-top: 0;
+      font-family: "IBM Plex Sans Condensed", "Aptos Display", "Helvetica Neue", sans-serif;
+      font-size: clamp(2.15rem, 4vw, 3.55rem);
+      letter-spacing: -0.035em;
+    }
+
+    h3 {
+      margin-top: 34px;
+      font-size: 1.38rem;
+      letter-spacing: -0.01em;
+    }
+
+    h4 {
+      margin-top: 24px;
+      color: var(--teal);
+      font-size: 1.02rem;
+      font-weight: 900;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .sanity-subsection-title {
+      margin-top: 42px;
+      border-left: 7px solid var(--teal);
+      border-radius: 14px;
+      padding: 12px 16px;
+      color: var(--forest);
+      background:
+        linear-gradient(90deg, rgba(22, 123, 143, 0.12), rgba(255, 255, 255, 0));
+      font-size: clamp(1.65rem, 2.5vw, 2.15rem);
+      letter-spacing: -0.02em;
+    }
+
+    .lead {
+      position: relative;
+      z-index: 1;
+      max-width: 70ch;
+      margin: 22px 0 0;
+      color: #334758;
+      font-size: clamp(1.16rem, 1.8vw, 1.38rem);
+    }
+
+    .hero-actions {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 30px;
+    }
+
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 44px;
+      border: 1px solid var(--forest);
+      border-radius: 999px;
+      padding: 10px 16px;
+      color: #fff;
+      background: var(--forest);
+      box-shadow: 0 12px 28px rgba(11, 53, 81, 0.2);
+      font-weight: 900;
+      text-decoration: none;
+    }
+
+    .button.secondary {
+      color: var(--forest);
+      background: rgba(255, 255, 255, 0.65);
+      box-shadow: none;
+    }
+
+    .hero-card {
+      display: grid;
+      align-content: space-between;
+      border-radius: 34px;
+      padding: 20px;
+      background:
+        linear-gradient(160deg, rgba(22, 123, 143, 0.1), rgba(255, 255, 255, 0.86) 42%),
+        rgba(255, 255, 255, 0.9);
+    }
+
+    .hero-card img {
+      width: 100%;
+      border: 1px solid rgba(17, 103, 168, 0.18);
+      background: #fff;
+    }
+
+    .caption {
+      margin: 14px 4px 0;
+      color: var(--muted);
+      font-size: 1.02rem;
+    }
+
+    .content-card {
+      border-radius: var(--radius);
+      padding: clamp(22px, 4vw, 42px);
+    }
+
+    section {
+      scroll-margin-top: 96px;
+      margin-top: 42px;
+      padding-top: 4px;
+      border-top: 1px solid rgba(199, 215, 228, 0.9);
+    }
+
+    section:first-child {
+      margin-top: 0;
+      border-top: 0;
+      padding-top: 0;
+    }
+
+    p {
+      margin: 14px 0 0;
+      font-size: 1.04rem;
+    }
+
+    ul,
+    ol {
+      margin: 14px 0 0;
+      padding-left: 1.35rem;
+    }
+
+    li + li {
+      margin-top: 9px;
+    }
+
+    .two-col-table,
+    .three-col-table {
+      width: 100%;
+      border-spacing: 14px;
+      margin-top: 14px;
+    }
+
+    .two-col-table td,
+    .three-col-table td {
+      width: 50%;
+      border: 1px solid rgba(199, 215, 228, 0.9);
+      border-radius: 20px;
+      padding: 18px;
+      vertical-align: top;
+      background: rgba(255, 255, 255, 0.72);
+    }
+
+    .three-col-table td {
+      width: 33.333%;
+    }
+
+    .two-col-table img,
+    .three-col-table img {
+      margin-bottom: 10px;
+      background: #101715;
+    }
+
+    details {
+      border: 1px solid rgba(199, 215, 228, 0.9);
+      border-radius: 20px;
+      margin-top: 16px;
+      padding: 18px 20px;
+      background: rgba(255, 255, 255, 0.72);
+    }
+
+    summary {
+      cursor: pointer;
+      color: var(--forest);
+      font-size: 1.05rem;
+      font-weight: 900;
+    }
+
+    details[open] {
+      background:
+        linear-gradient(135deg, rgba(17, 103, 168, 0.07), rgba(22, 123, 143, 0.08)),
+        rgba(255, 255, 255, 0.82);
+    }
+
+    .brains-details {
+      border-left: 7px solid var(--gold);
+    }
+
+    .resource-list {
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.55;
+    }
+
+    .resource-list li {
+      margin-top: 10px;
+    }
+
+    .resource-list code {
+      font-size: 0.95em;
+    }
+
+    .footer {
+      margin-top: 34px;
+      border-top: 1px solid rgba(199, 215, 228, 0.9);
+      padding-top: 24px;
+      color: var(--muted);
+      font-size: 1rem;
+    }
+
+    @media (max-width: 900px) {
+      .top-nav {
+        position: static;
+        align-items: flex-start;
+        border-radius: 24px;
+        flex-direction: column;
+      }
+
+      .nav-links {
+        justify-content: flex-start;
+      }
+
+      .hero {
+        grid-template-columns: 1fr;
+      }
+
+      .two-col-table,
+      .three-col-table,
+      .two-col-table tbody,
+      .three-col-table tbody,
+      .two-col-table tr,
+      .three-col-table tr,
+      .two-col-table td,
+      .three-col-table td {
+        display: block;
+        width: 100%;
+      }
+
+      .two-col-table,
+      .three-col-table {
+        border-spacing: 0;
+      }
+
+      .two-col-table td + td,
+      .three-col-table td + td {
+        margin-top: 14px;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .page {
+        width: min(100% - 22px, 1180px);
+        padding-top: 12px;
+      }
+
+      .hero-copy,
+      .hero-card,
+      .content-card {
+        border-radius: 24px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <div class="page">
+    <nav class="top-nav" aria-label="Page sections">
+      <div class="brand"><span class="brand-mark" aria-hidden="true"></span> MRI QC Workflow</div>
+      <div class="nav-links">
+        <a href="#starting-file">Starting File</a>
+        <a href="#output-file">Output File</a>
+        <a href="#clinic">Clinic Criteria</a>
+        <a href="#structural">Structural QC</a>
+        <a href="#functional">Functional QC</a>
+        <a href="#sanity">Sanity Checks</a>
+        <a href="#summary">Summary</a>
+      </div>
+    </nav>
+
+    <header class="hero">
+      <div class="hero-copy">
+        <p class="eyebrow">Rendered from imaging-qc-workflow.md</p>
+        <h1>MRI QC Workflow</h1>
+        <p class="lead">This document summarizes a template for building an analysis-ready clean imaging dataset from its BIDS curation. It documents QC experiences for cleaning the Brains dataset for demonstration.</p>
+        <div class="hero-actions">
+          <a class="button" href="#clinic">Clinic-based criteria</a>
+          <a class="button secondary" href="imaging-qc-workflow.md">View source markdown</a>
+        </div>
+      </div>
+      <aside class="hero-card" aria-label="Brains dataset QC flow diagram">
+        <img src="assets/plots/brains-qc-flow.png" alt="Brains dataset QC flow diagram">
+        <p class="caption"><code>brains-qc-flow.png</code> illustrates the QC process applied to the Brains dataset and the resulting dataset at each QC stage.</p>
+      </aside>
+    </header>
+
+    <main id="main" class="content-card">
+      <section id="starting-file">
+        <h2>Starting file</h2>
+        <ul>
+          <li>Raw BIDS</li>
+          <li>Exclusion subject list (from clinical trial)</li>
+          <li><code>fmriprep</code> HTML reports, BOLD/fieldmap distortion-correction views, and automated motion and signal metrics such as FD and tSNR (these can often be found in <code>figures/</code> from pipeline outputs)</li>
+          <li>FreeSurfer structural QC outputs and modality-specific derivatives</li>
+          <li>Study tracking notes (from study leads and staffs)</li>
+          <li>REDCap exports</li>
+        </ul>
+      </section>
+
+      <section id="output-file">
+        <h2>Output file</h2>
+        <ul>
+          <li>Keep the original BIDS dataset unchanged (read-only!).</li>
+          <li>Write QC decisions to separate artifacts and analysis tables.</li>
+          <li>Minimum output:
+            <ul>
+              <li>a clean subject-session (at the single-sample level) inclusion/exclusion ledger (will be frozen prior to analysis starts)</li>
+              <li>explicit reasons for exclusion (clearly state if exclusions are image-based or clinic-based)</li>
+            </ul>
+          </li>
+        </ul>
+      </section>
+
+      <section id="clinic">
+        <h2>Clinic-based Inclusion/Exclusion Criteria</h2>
+        <ul>
+          <li>Apply non-imaging exclusions before image QC.</li>
+          <li>Common reasons:
+            <ul>
+              <li>withdrew from the study</li>
+              <li>did not meet trial requirements</li>
+              <li>ineligible per clinical review</li>
+              <li>session should not be analyzed based on study team notes</li>
+              <li>additional exceptions discovered from REDCap or after checking with study staff</li>
+            </ul>
+          </li>
+          <li>Tips: Record these in a subject-session ledger so later imaging exclusions do not overwrite the clinical history.</li>
+        </ul>
+
+        <details class="brains-details">
+          <summary>How this was tracked in Brains</summary>
+          <ul>
+            <li>The Brains freeze combined:
+              <ul>
+                <li>full-participant exclusions</li>
+                <li>session-level exclusions</li>
+                <li>tracking-workbook notes</li>
+                <li>REDCap-derived information</li>
+                <li>imaging QC failures</li>
+              </ul>
+            </li>
+            <li>The inclusion ledger and subject manifest were treated as the authoritative record of why a subject or session was kept or dropped.</li>
+            <li>Tips:
+              <ul>
+                <li>do not collapse clinic-based and image-based exclusions into one vague label</li>
+                <li>keep the reason explicit so the final sample can be reproduced later</li>
+              </ul>
+            </li>
+          </ul>
+        </details>
+      </section>
+
+      <section id="structural">
+        <h2>Structural-Based Exclusion (QC)</h2>
+        <ul>
+          <li>Structural QC was done in 2 parts:
+            <ul>
+              <li>manual review of structural processing quality</li>
+              <li>executable freeze rules used for the final structural analysis sample</li>
+            </ul>
+          </li>
+        </ul>
+
+        <h3>What to exclude</h3>
+        <ul>
+          <li>Gross mismatch between the T1 image and the cortical ribbon / white-matter surfaces</li>
+          <li>Widespread segmentation failure rather than a small local imperfection</li>
+          <li>Catastrophic alignment failures</li>
+          <li>Structural images that are so compromised that downstream registration cannot be trusted</li>
+        </ul>
+
+        <h3>Visual QC Examples</h3>
+
+        <details open>
+          <summary>Reject / Flag</summary>
+          <table class="two-col-table">
+            <tr>
+              <td>
+                <img src="assets/qc-thumbs/failure1.png" alt="Structural failure example with poor cortical surface reconstruction" width="280">
+                <strong>Cortical surface reconstruction inaccurate</strong><br>
+                <strong>Verdict:</strong> Reject.<br>
+                The cortical ribbon is grossly misaligned in the temporal lobes, so downstream registration cannot be trusted.
+              </td>
+              <td>
+                <img src="assets/qc-thumbs/failure2.png" alt="Catastrophic structural QC failure example" width="280">
+                <strong>Segmentation or underlying T1 looks comically bad</strong><br>
+                <strong>Verdict:</strong> Reject / flag for review.<br>
+                This is the kind of catastrophic failure that should be excluded even if it does not match a canned example exactly.
+              </td>
+            </tr>
+          </table>
+        </details>
+
+        <details>
+          <summary>Accept With Caveats</summary>
+          <table class="two-col-table">
+            <tr>
+              <td>
+                <img src="assets/qc-thumbs/ok2.png" alt="Structural example with Gibbs ringing" width="240">
+                <strong>Gibbs ringing</strong><br>
+                <strong>Verdict:</strong> Conditional accept.<br>
+                Heavy ringing should usually prevent a top score, but it can still pass if the gray/white matter boundary is otherwise well-tracked.
+              </td>
+              <td>
+                <img src="assets/qc-thumbs/ok5.png" alt="Structural examples that can falsely appear to be bad" width="300">
+                <img src="assets/qc-thumbs/ok7.png" alt="Additional structural examples that can falsely appear to be bad" width="300">
+                <strong>Images that may falsely appear to be bad</strong><br>
+                <strong>Verdict:</strong> Usually accept.<br>
+                Use anatomical context before failing scans around sulcal spaces, basal ganglia, hippocampus, or amygdala. Above are both examples of views that can look wrong if judged slice-by-slice without considering the surrounding anatomy. For instance, the isolated circles on the right seem odd and potentially erroneous, but they are actually part of a normal sulcal space that persists across multiple slices in x, y and z.
+              </td>
+            </tr>
+          </table>
+        </details>
+
+        <details>
+          <summary>Accept / Normal Variants</summary>
+          <table class="three-col-table">
+            <tr>
+              <td>
+                <img src="assets/qc-thumbs/ok1.png" alt="Mid-sagittal structural slice that looks odd but is acceptable" width="220">
+                <strong>Mid-sagittal slice can look bad</strong><br>
+                <strong>Verdict:</strong> Accept.<br>
+                Increased interhemispheric space at the midline is not itself a failure.
+              </td>
+              <td>
+                <img src="assets/qc-thumbs/ok6.png" alt="Longitudinal mid-sagittal slice with discontinuous boundaries that is acceptable" width="220">
+                <strong>Longitudinal midline views can look discontinuous</strong><br>
+                <strong>Verdict:</strong> Accept.<br>
+                When a slice captures lots of CSF between hemispheres, irregular ribbons can be a sign that FreeSurfer is behaving correctly.
+              </td>
+              <td>
+                <img src="assets/qc-thumbs/ok4.png" alt="Good structural segmentation example" width="220">
+                <strong>Good segmentation</strong><br>
+                <strong>Verdict:</strong> Accept.<br>
+                Gray and white matter boundaries are well captured, even if the image is not absolutely perfect.
+              </td>
+            </tr>
+          </table>
+        </details>
+
+        <h3>Brains Structural QC</h3>
+        <details class="brains-details">
+          <summary>Details</summary>
+          <ul>
+            <li>Manual rating scale from the archived Brains QC notes:
+              <ul>
+                <li><code>1</code>: extremely poor processing; unusable for downstream alignment</li>
+                <li><code>2</code>: sub-par image/alignment/surface with widespread errors</li>
+                <li><code>3</code>: mostly good; minor deviations are exceptions</li>
+                <li><code>4</code>: pristine image, template alignment, and surface reconstruction</li>
+              </ul>
+            </li>
+            <li>Structural artifacts identified as failures:
+              <ul>
+                <li>cortical ribbon far off the anatomy</li>
+                <li>poor temporal-lobe segmentation</li>
+                <li>catastrophic structural failures even if they do not match a canned example</li>
+              </ul>
+            </li>
+            <li>Structural patterns identified as not automatic failures:
+              <ul>
+                <li>midsagittal gaps between hemispheres</li>
+                <li>imperfect-looking basal ganglia / hippocampus / amygdala boundaries in this cortical QC view</li>
+                <li>small bubble-like sulcal spaces that are anatomically continuous across slices</li>
+                <li>Gibbs ringing, if gray/white boundary detection still looks good</li>
+              </ul>
+            </li>
+            <li>Executable Brains structural QC rules:
+              <ul>
+                <li>session must not be in the manual exclusion list, either clinic- or imaging-based</li>
+                <li>auto QC pass: <code>EulerTotal &lt; 100</code></li>
+              </ul>
+            </li>
+          </ul>
+        </details>
+
+        <h3>Helpful resources</h3>
+        <ul class="resource-list">
+          <li><a href="https://ondemand.sherlock.stanford.edu/">Sherlock OnDemand</a><br>
+            Sherlock OnDemand. This was the main access point for downloading <code>fmriprep</code> reports, <code>figures/</code>, and other QC materials from the Brains project directories.</li>
+          <li><a href="https://docs.google.com/spreadsheets/d/1eqrq1ljzznu_nocXYXM0Nf8Cn4K2-KJ1JJKNnd4yWcw/edit?usp=sharing">Data team Next Week's Data</a><br>
+            Internal data-team tracking sheet documenting data-quality issues observed during the trial. Useful for cross-checking subject/session-specific notes alongside the structural QC review.</li>
+          <li><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC3254728/">MRI QC background paper</a><br>
+            Background reading on why MRI image-quality problems can create misleading findings and why QC matters so much for downstream inference.</li>
+          <li><a href="https://mriquestions.com/gibbs-artifact.html">Gibbs artifact reference</a><br>
+            MRIQuestions overview of Gibbs artifact / Gibbs ringing. Helpful when deciding whether visible ringing is severe enough to compromise gray/white boundary detection.</li>
+          <li><a href="https://pubs.rsna.org/doi/full/10.1148/rg.210153">Hippocampal labeling reference 1</a><br>
+            Hippocampal labeling reference suggested in the Brains QC notes for reviewing medial temporal lobe anatomy and avoiding false positives during structural QC.</li>
+          <li><a href="https://insightsimaging.springeropen.com/articles/10.1007/s13244-016-0541-2">Hippocampal labeling reference 2</a><br>
+            Additional hippocampal labeling / anatomy reference suggested in the Brains QC notes for checking whether odd-looking medial temporal segmentations are actually expected.</li>
+        </ul>
+      </section>
+
+      <section id="functional">
+        <h2>Functional Imaging-Based Exclusion (QC)</h2>
+        <ul>
+          <li>Functional QC in Brains relied on both automated metrics and manual review.</li>
+          <li>Automated metrics such as FD (head motion) and tSNR (signal) were considered useful for masking/censoring and for detecting poor scans.</li>
+          <li>Manual QC was intentionally narrower: catch egregious failures that automated metrics could miss.</li>
+        </ul>
+
+        <h3>What to exclude</h3>
+        <ul>
+          <li>Obvious preprocessing failures that make the BOLD data unreliable</li>
+          <li>Catastrophic susceptibility distortion correction errors</li>
+          <li>Scan/session combinations with severe functional problems that cannot be rescued by ordinary censoring or masking</li>
+        </ul>
+
+        <h3>Visual QC Examples</h3>
+
+        <details open>
+          <summary>Reject / Fail</summary>
+          <table class="two-col-table">
+            <tr>
+              <td>
+                <img src="assets/qc-thumbs/failure3.png" alt="Catastrophic functional susceptibility distortion correction failure" width="320">
+                <strong>Improper susceptibility distortion correction: catastrophic</strong><br>
+                <strong>Verdict:</strong> Reject.<br>
+                This occurred when BOLD images were encoded in <code>ARS</code> coordinates but fieldmaps were in <code>RPI</code>.
+              </td>
+              <td>
+                <img src="assets/qc-thumbs/failure4.png" alt="Functional susceptibility distortion correction failure that is subtler but still bad" width="320">
+                <strong>Improper susceptibility distortion correction: still bad, but subtler</strong><br>
+                <strong>Verdict:</strong> Reject.<br>
+                This occurred when both BOLD and fieldmaps were encoded in <code>ARS</code>; the image is better than the catastrophic case but still not acceptable.
+              </td>
+            </tr>
+          </table>
+        </details>
+
+        <details>
+          <summary>Accept / Pass</summary>
+          <table class="two-col-table">
+            <tr>
+              <td>
+                <img src="assets/qc-thumbs/ok3.png" alt="Proper functional susceptibility distortion correction example" width="360">
+                <strong>Proper susceptibility distortion correction</strong><br>
+                <strong>Verdict:</strong> Accept.<br>
+                Distortion correction worked when both BOLD and fieldmaps were correctly treated as <code>RPI</code>. In Brains, all scans were acquired <code>RPI/RPI</code>, but older <code>dcm2niix</code> versions sometimes mislabeled GE scans as <code>ARS</code>, which then broke phase-encoding correction.
+              </td>
+            </tr>
+          </table>
+        </details>
+
+        <h3>Brains Functional QC</h3>
+        <details class="brains-details">
+          <summary>Details</summary>
+          <ul>
+            <li>Review was binary rather than continuous:
+              <ul>
+                <li>pass if all functional scans for the subject passed review</li>
+                <li>fail if at least one functional scan did not pass</li>
+              </ul>
+            </li>
+            <li>If a subject failed, the notes recorded the exact bad scans:
+              <ul>
+                <li>session <code>V2-V10</code></li>
+                <li>scan number <code>rs1-rs4</code></li>
+              </ul>
+            </li>
+            <li>Manual review focused especially on susceptibility distortion correction problems rather than trying to manually rate every small quality difference</li>
+            <li>Automated metrics:
+              <ul>
+                <li>FD for head motion</li>
+                <li>tSNR for signal quality</li>
+              </ul>
+            </li>
+            <li>The key Brains-specific functional issue was susceptibility distortion correction failure:
+              <ul>
+                <li>catastrophic failures occurred when BOLD images were encoded in <code>ARS</code> coordinates but fieldmaps were in <code>RPI</code></li>
+                <li>subtler but still bad failures occurred when both BOLD and fieldmaps were encoded in <code>ARS</code></li>
+                <li>distortion correction worked when both were correctly treated as <code>RPI</code></li>
+              </ul>
+            </li>
+            <li>Technical issues:
+              <ul>
+                <li>all scans were acquired <code>RPI/RPI</code></li>
+                <li>older <code>dcm2niix</code> versions sometimes mislabeled GE scanner data as <code>ARS</code></li>
+                <li>because phase-encoding direction was interpreted relative to coordinates, this coordinate error caused bad distortion correction</li>
+              </ul>
+            </li>
+          </ul>
+        </details>
+
+        <h3>Helpful resources</h3>
+        <ul class="resource-list">
+          <li><a href="https://ondemand.sherlock.stanford.edu/">Sherlock OnDemand</a><br>
+            Sherlock OnDemand. Used to access the Brains <code>fmriprep</code> HTML reports and associated <code>figures/</code> for manual BOLD QC.</li>
+          <li><a href="https://docs.google.com/spreadsheets/d/1eqrq1ljzznu_nocXYXM0Nf8Cn4K2-KJ1JJKNnd4yWcw/edit?usp=sharing">Data team Next Week's Data</a><br>
+            Internal data-team tracking sheet documenting data-quality issues observed during the trial. Useful for checking session-level notes and flagged concerns while reviewing functional QC decisions.</li>
+          <li><a href="https://www.mriquestions.com/susceptibility-artifact.html">Susceptibility artifact reference</a><br>
+            MRIQuestions overview of susceptibility artifact. Useful background for understanding the type of frontal and inferior distortions the Brains functional QC was checking.</li>
+          <li><a href="https://www.fieldtriptoolbox.org/faq/source/coordsys/">FieldTrip coordinate-system FAQ</a><br>
+            FieldTrip coordinate-system FAQ. This is directly relevant to the Brains issue where BOLD and fieldmaps were mislabeled in <code>ARS</code> vs <code>RPI</code>, which then broke distortion correction.</li>
+        </ul>
+      </section>
+
+      <section id="sanity">
+        <h2>Additional Sanity Checks</h2>
+
+        <h3 class="sanity-subsection-title">Scanner- and Site-Dependent Artifacts</h3>
+        <ul>
+          <li>Always check whether site, scanner, conversion software, or protocol changes introduced systematic artifacts.</li>
+          <li>Do this before finalizing the analysis sample, and document the check in the freeze record.</li>
+        </ul>
+
+        <h3>What to verify</h3>
+        <ul>
+          <li>scanner vendor / model / upgrade timing</li>
+          <li>dcm2niix version or other DICOM-to-BIDS conversion changes</li>
+          <li>orientation labels and phase-encoding direction</li>
+          <li>fieldmap presence and correct pairing with BOLD scans</li>
+          <li>special session naming issues, missing folders, or “do not use” notes in the file structure</li>
+        </ul>
+
+        <details class="brains-details">
+          <summary>Brains-specific scanner/site checks</summary>
+          <ul>
+            <li>Functional QC revealed a scanner/conversion-specific issue:
+              <ul>
+                <li>older <code>dcm2niix</code> versions sometimes mishandled GE data and assigned <code>ARS</code> coordinates to scans that were actually <code>RPI</code></li>
+                <li>this broke susceptibility distortion correction because the phase-encoding direction was interpreted in the wrong coordinate frame</li>
+              </ul>
+            </li>
+            <li>Structural workflow also included a scanner-upgrade sensitivity check:
+              <ul>
+                <li>freeze a list of scans acquired before the upgrade</li>
+                <li>run the upgrade comparison on the already matched structural analysis sample, not on the raw full dataset</li>
+                <li>compare pre- vs post-upgrade effects with saved model summaries</li>
+              </ul>
+            </li>
+          </ul>
+
+          <img src="assets/plots/fmri-std-scanner-upgrade-artifacts.png" alt="fMRI standard-space scanner upgrade artifacts comparison plot" width="760">
+
+          <ul>
+            <li>Example: this plot summarizes scanner-upgrade-related artifacts observed in standard-space fMRI outputs and can be used to document pre/post-upgrade sensitivity checks.</li>
+            <li>Tips:
+              <ul>
+                <li>keep a scanner-change log; stay up-to-date on facility announcements or news</li>
+                <li>track conversion software versions</li>
+                <li>verify orientation and distortion-correction behavior visually in reports</li>
+                <li>save an explicit pre/post-upgrade registry and sensitivity analysis</li>
+              </ul>
+            </li>
+          </ul>
+        </details>
+
+        <h3>Helpful resources</h3>
+        <ul class="resource-list">
+          <li><a href="https://cni.su.domains/wiki/index.php?title=Main_Page">CNI Wiki main page</a><br>
+            CNI facility wiki with technical information for users, including getting started materials, troubleshooting, MR hardware and protocols, data access, and QA-related pages. This is a good first place to check for facility-specific procedures and documentation that may explain site-dependent artifacts.</li>
+          <li><a href="https://cni.su.domains/scan-data-acquired-from-august-2-11/">CNI facility news example: Scan Data Acquired From August 2-11</a><br>
+            CNI facility-news post from August 20, 2021 describing a coherent MR noise source that was ultimately traced to an environmental issue in the facility. This is a useful example of where site-dependent artifacts may be documented outside the imaging dataset itself.</li>
+          <li><a href="https://cni.su.domains/scan-data-acquired-from-august-19-23/">CNI facility news example: Scan Data Acquired From August 19-23</a><br>
+            CNI facility-news post from August 26, 2021 documenting the August 17-18, 2021 scanner upgrade and the post-upgrade artifact issue that affected some sequences. Useful for checking whether known upgrade windows overlap with acquisition dates in your study.</li>
+        </ul>
+
+        <h3 class="sanity-subsection-title">Timepoint Harmonization</h3>
+        <ul>
+          <li>Pair each imaging session with the correct clinical assessment and treatment timepoint.</li>
+          <li>This mattered because imaging, clinician ratings, self-report ratings, and TMS treatment did not always happen on the exact same calendar day.</li>
+          <li>Instead of assuming event labels were already synchronized, the workflow created an explicit date-alignment layer that could be audited later.</li>
+        </ul>
+
+        <details class="brains-details">
+          <summary>Visual QC of timepoint alignment</summary>
+          <img src="assets/plots/s015.png" alt="Subject-level timepoint alignment plot for sub-s015" width="760">
+          <ul>
+            <li>Example: this plot illustrates event timepoints of patient <code>s015</code> from the Brains trial, whose baseline MADRS was evaluated 23 days after baseline neuroimaging visit.</li>
+            <li>Clinician notes explained: "patient became numb with medication dose increase during screening, elected to discontinue medication and then pursue treatment with us"</li>
+            <li>Tip: flag mismatched date assignments, missing date fields, and suspiciously large gaps between treatment, scan, and symptom assessment</li>
+          </ul>
+        </details>
+      </section>
+
+      <section id="summary">
+        <h2>Summary</h2>
+        <ul>
+          <li>Basic workflow:
+            <ul>
+              <li>preprocess and curate imaging data to BIDS organization</li>
+              <li>apply clinic-based inclusion/exclusion first</li>
+              <li>build a subject-session ledger</li>
+              <li>run structural QC with explicit automated and manual rules</li>
+              <li>run functional QC to catch egregious preprocessing failures, especially distortion-correction errors</li>
+              <li>QC additional sources of bias, such as scanner and software versioning, timestamp harmonization, etc.; document additional artifacts separately</li>
+            </ul>
+          </li>
+        </ul>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <p>Source content: <a href="imaging-qc-workflow.md">imaging-qc-workflow.md</a>. This page is a static GitHub Pages companion for the dataset QC workflow.</p>
+    </footer>
+  </div>
+</body>
+</html>

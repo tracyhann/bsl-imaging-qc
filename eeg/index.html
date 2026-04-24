@@ -1,0 +1,693 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>EEG QC Workflow</title>
+  <meta name="description" content="EEG QC Workflow rendered from EEG-QC-workflow/EEG-QC-workflow.md.">
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #14212b;
+      --muted: #526575;
+      --paper: #eef4f8;
+      --surface: #ffffff;
+      --surface-strong: #e7f2f8;
+      --line: #c7d7e4;
+      --forest: #0b3551;
+      --teal: #167b8f;
+      --gold: #4f86a8;
+      --coral: #b34a48;
+      --blue: #1167a8;
+      --shadow: 0 24px 70px rgba(17, 45, 68, 0.13);
+      --radius: 24px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at top left, rgba(22, 123, 143, 0.18), transparent 31rem),
+        radial-gradient(circle at 92% 8%, rgba(17, 103, 168, 0.18), transparent 28rem),
+        linear-gradient(135deg, #f6fbfe 0%, #edf5fa 44%, #f8fbfd 100%);
+      font-family: "IBM Plex Sans", "Aptos", "Helvetica Neue", "Segoe UI", Verdana, sans-serif;
+      font-size: 18px;
+      line-height: 1.7;
+    }
+
+    body::before {
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      pointer-events: none;
+      content: "";
+      opacity: 0.3;
+      background-image:
+        linear-gradient(rgba(17, 103, 168, 0.07) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(17, 103, 168, 0.07) 1px, transparent 1px);
+      background-size: 34px 34px;
+      mask-image: linear-gradient(to bottom, #000, transparent 78%);
+    }
+
+    a {
+      color: var(--blue);
+      font-weight: 800;
+      text-decoration-thickness: 0.08em;
+      text-underline-offset: 0.2em;
+    }
+
+    img {
+      display: block;
+      max-width: 100%;
+      height: auto;
+      border-radius: 18px;
+    }
+
+    code {
+      border: 1px solid rgba(23, 75, 63, 0.14);
+      border-radius: 8px;
+      padding: 0.12rem 0.38rem;
+      color: #0b3551;
+      background: rgba(231, 242, 248, 0.86);
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+      font-size: 0.92em;
+    }
+
+    .page {
+      width: min(1180px, calc(100% - 36px));
+      margin: 0 auto;
+      padding: 28px 0 64px;
+    }
+
+    .skip-link {
+      position: absolute;
+      left: 20px;
+      top: -80px;
+      z-index: 20;
+      border-radius: 999px;
+      padding: 10px 14px;
+      color: #fff;
+      background: var(--forest);
+      transition: top 160ms ease;
+    }
+
+    .skip-link:focus {
+      top: 20px;
+    }
+
+    .top-nav {
+      position: sticky;
+      top: 12px;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      margin-bottom: 28px;
+      border: 1px solid rgba(199, 215, 228, 0.9);
+      border-radius: 999px;
+      padding: 10px 12px 10px 18px;
+      background: rgba(255, 255, 255, 0.9);
+      box-shadow: 0 12px 40px rgba(17, 45, 68, 0.08);
+      backdrop-filter: blur(18px);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: max-content;
+      color: var(--forest);
+      font-weight: 900;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+    }
+
+    .brand-mark {
+      width: 18px;
+      height: 18px;
+      border-radius: 6px;
+      background:
+        linear-gradient(135deg, var(--forest) 0 45%, transparent 45%),
+        linear-gradient(315deg, var(--teal) 0 46%, #8fb7cb 46%);
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.46);
+    }
+
+    .nav-links {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 6px;
+    }
+
+    .nav-links a {
+      border-radius: 999px;
+      padding: 9px 12px;
+      color: var(--muted);
+      font-size: 0.94rem;
+      text-decoration: none;
+    }
+
+    .nav-links a:hover,
+    .nav-links a:focus {
+      color: #fff;
+      background: var(--forest);
+    }
+
+    .hero {
+      margin-bottom: 30px;
+    }
+
+    .hero-copy,
+    .content-card {
+      border: 1px solid rgba(199, 215, 228, 0.9);
+      background: rgba(255, 255, 255, 0.9);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(12px);
+    }
+
+    .hero-copy {
+      position: relative;
+      overflow: hidden;
+      border-radius: 34px;
+      padding: clamp(28px, 5vw, 58px);
+    }
+
+    .hero-copy::after {
+      position: absolute;
+      right: -90px;
+      bottom: -120px;
+      width: 270px;
+      height: 270px;
+      border: 42px solid rgba(22, 123, 143, 0.13);
+      border-radius: 50%;
+      content: "";
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin: 0 0 18px;
+      border: 1px solid rgba(17, 103, 168, 0.18);
+      border-radius: 999px;
+      padding: 6px 11px;
+      color: var(--forest);
+      background: rgba(231, 242, 248, 0.86);
+      font-size: 0.84rem;
+      font-weight: 900;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4 {
+      margin: 0;
+      color: var(--forest);
+      line-height: 1.1;
+    }
+
+    h1 {
+      max-width: 12ch;
+      font-family: "IBM Plex Sans Condensed", "Aptos Display", "Helvetica Neue", sans-serif;
+      font-size: clamp(3.2rem, 8vw, 6.9rem);
+      font-weight: 900;
+      letter-spacing: -0.06em;
+    }
+
+    h2 {
+      margin-top: 0;
+      font-family: "IBM Plex Sans Condensed", "Aptos Display", "Helvetica Neue", sans-serif;
+      font-size: clamp(2.15rem, 4vw, 3.55rem);
+      letter-spacing: -0.035em;
+    }
+
+    h3 {
+      margin-top: 34px;
+      font-size: 1.38rem;
+      letter-spacing: -0.01em;
+    }
+
+    h4 {
+      margin-top: 24px;
+      color: var(--teal);
+      font-size: 1.02rem;
+      font-weight: 900;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .sanity-subsection-title {
+      margin-top: 42px;
+      border-left: 7px solid var(--teal);
+      border-radius: 14px;
+      padding: 12px 16px;
+      color: var(--forest);
+      background:
+        linear-gradient(90deg, rgba(22, 123, 143, 0.12), rgba(255, 255, 255, 0));
+      font-size: clamp(1.65rem, 2.5vw, 2.15rem);
+      letter-spacing: -0.02em;
+    }
+
+    .lead {
+      position: relative;
+      z-index: 1;
+      max-width: 70ch;
+      margin: 22px 0 0;
+      color: #334758;
+      font-size: clamp(1.16rem, 1.8vw, 1.38rem);
+    }
+
+    .hero-actions {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 30px;
+    }
+
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 44px;
+      border: 1px solid var(--forest);
+      border-radius: 999px;
+      padding: 10px 16px;
+      color: #fff;
+      background: var(--forest);
+      box-shadow: 0 12px 28px rgba(11, 53, 81, 0.2);
+      font-weight: 900;
+      text-decoration: none;
+    }
+
+    .button.secondary {
+      color: var(--forest);
+      background: rgba(255, 255, 255, 0.65);
+      box-shadow: none;
+    }
+
+    .caption {
+      margin: 14px 4px 0;
+      color: var(--muted);
+      font-size: 1.08rem;
+    }
+
+    .content-card {
+      border-radius: var(--radius);
+      padding: clamp(22px, 4vw, 42px);
+    }
+
+    section {
+      scroll-margin-top: 96px;
+      margin-top: 42px;
+      padding-top: 4px;
+      border-top: 1px solid rgba(199, 215, 228, 0.9);
+    }
+
+    section:first-child {
+      margin-top: 0;
+      border-top: 0;
+      padding-top: 0;
+    }
+
+    p {
+      margin: 14px 0 0;
+      font-size: 1.14rem;
+    }
+
+    ul,
+    ol {
+      margin: 14px 0 0;
+      padding-left: 1.35rem;
+    }
+
+    li + li {
+      margin-top: 9px;
+    }
+
+    li,
+    td {
+      font-size: 1.14rem;
+    }
+
+    .file-list {
+      padding-left: 1.2rem;
+    }
+
+    .file-list li {
+      margin-top: 10px;
+    }
+
+    .file-list strong {
+      color: var(--forest);
+    }
+
+    .two-col-table,
+    .three-col-table {
+      width: 100%;
+      border-spacing: 14px;
+      margin-top: 14px;
+    }
+
+    .two-col-table td,
+    .three-col-table td {
+      width: 50%;
+      border: 1px solid rgba(199, 215, 228, 0.9);
+      border-radius: 20px;
+      padding: 18px;
+      vertical-align: top;
+      background: rgba(255, 255, 255, 0.72);
+    }
+
+    .three-col-table td {
+      width: 33.333%;
+    }
+
+    .two-col-table img,
+    .three-col-table img {
+      margin-bottom: 10px;
+      background: #101715;
+    }
+
+    .full-width-image {
+      border: 1px solid rgba(199, 215, 228, 0.9);
+      margin-top: 16px;
+      background: #fff;
+    }
+
+    .example-image {
+      border: 1px solid rgba(17, 103, 168, 0.18);
+      margin-top: 16px;
+      background: #fff;
+    }
+
+    details {
+      border: 1px solid rgba(199, 215, 228, 0.9);
+      border-radius: 20px;
+      margin-top: 16px;
+      padding: 18px 20px;
+      background: rgba(255, 255, 255, 0.72);
+    }
+
+    summary {
+      cursor: pointer;
+      color: var(--forest);
+      font-size: 1.12rem;
+      font-weight: 900;
+    }
+
+    details[open] {
+      background:
+        linear-gradient(135deg, rgba(17, 103, 168, 0.07), rgba(22, 123, 143, 0.08)),
+        rgba(255, 255, 255, 0.82);
+    }
+
+    .workflow-details {
+      border-left: 7px solid var(--gold);
+    }
+
+    .resource-list {
+      color: var(--muted);
+      font-size: 1.02rem;
+      line-height: 1.55;
+    }
+
+    .resource-list li {
+      margin-top: 10px;
+    }
+
+    .resource-list code {
+      font-size: 0.95em;
+    }
+
+    .footer {
+      margin-top: 34px;
+      border-top: 1px solid rgba(199, 215, 228, 0.9);
+      padding-top: 24px;
+      color: var(--muted);
+      font-size: 1rem;
+    }
+
+    @media (max-width: 900px) {
+      .top-nav {
+        position: static;
+        align-items: flex-start;
+        border-radius: 24px;
+        flex-direction: column;
+      }
+
+      .nav-links {
+        justify-content: flex-start;
+      }
+
+      .two-col-table,
+      .three-col-table,
+      .two-col-table tbody,
+      .three-col-table tbody,
+      .two-col-table tr,
+      .three-col-table tr,
+      .two-col-table td,
+      .three-col-table td {
+        display: block;
+        width: 100%;
+      }
+
+      .two-col-table,
+      .three-col-table {
+        border-spacing: 0;
+      }
+
+      .two-col-table td + td,
+      .three-col-table td + td {
+        margin-top: 14px;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .page {
+        width: min(100% - 22px, 1180px);
+        padding-top: 12px;
+      }
+
+      .hero-copy,
+      .content-card {
+        border-radius: 24px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <div class="page">
+    <nav class="top-nav" aria-label="Page sections">
+      <div class="brand"><span class="brand-mark" aria-hidden="true"></span> EEG QC Workflow</div>
+      <div class="nav-links">
+        <a href="#required-files">Required Files</a>
+        <a href="#exclusion-qc">Exclusion QC</a>
+        <a href="#epochs">Epochs</a>
+        <a href="#channels">Channels</a>
+        <a href="#ica">ICA</a>
+        <a href="#sanity">Sanity Checks</a>
+        <a href="#resources">Resources</a>
+      </div>
+    </nav>
+
+    <header class="hero">
+      <div class="hero-copy">
+        <p class="eyebrow">Rendered from EEG-QC-workflow.md</p>
+        <h1>EEG QC Workflow</h1>
+        <p class="lead">This guide summarizes the EEG QC workflow for eyes-open resting-state EEG, including required files, rejection criteria, sanity checks, and visual examples.</p>
+        <div class="hero-actions">
+          <a class="button" href="#exclusion-qc">Review QC steps</a>
+          <a class="button secondary" href="EEG-QC-workflow.md">View source markdown</a>
+        </div>
+      </div>
+    </header>
+
+    <main id="main" class="content-card">
+      <section id="required-files">
+        <h2>Required Files</h2>
+        <p>EEG QC requires the three BrainVision files for each recording:</p>
+        <ul class="file-list">
+          <li><strong><code>.vhdr</code></strong>: BrainVision header file containing recording metadata, channel information, and impedance values when available.</li>
+          <li><strong><code>.vmrk</code></strong>: BrainVision marker file containing event markers and timing information for the recording.</li>
+          <li><strong><code>.eeg</code></strong>: BrainVision binary data file containing the recorded EEG signal.</li>
+        </ul>
+      </section>
+
+      <section id="exclusion-qc">
+        <h2>EEG-Based Exclusion QC</h2>
+        <p>The preprocessing pipeline is semi-automated and generally runs without manual intervention. However, human review is required at three rejection steps:</p>
+        <ul>
+          <li>Epoch rejection</li>
+          <li>Channel rejection</li>
+          <li>ICA artifact rejection</li>
+        </ul>
+        <p>A detailed description of the preprocessing pipeline is available here: <a href="https://docs.google.com/document/d/10Rvj0-LhDYRoRaD8N_zv_DT_DlLCnNtGqXTbCXcKCoM/edit?tab=t.0">BSL EEG Pre-Processing Pipeline for Eyes Open rsEEG</a>.</p>
+      </section>
+
+      <section id="epochs">
+        <h2>Epoch Rejection</h2>
+        <p>Epoch rejection removes recording segments that are contaminated by large-amplitude noise. Epochs should only be rejected when the artifact is extreme and clearly visible.</p>
+        <p>The preprocessing script selects epochs automatically, but reviewer input is required when too many epochs are rejected. In that case, the reviewer must decide whether to override the rejection step or mark the recording as unusable.</p>
+        <p>As a general rule, a recording should include at least 2 minutes of usable data to be included in an analysis.</p>
+
+        <h3>Epoch Rejection Example</h3>
+        <details open class="workflow-details">
+          <summary>Reject / Flag</summary>
+          <img class="full-width-image" src="assets/pdf-images/eeg-qc-001.png" alt="Bad EEG segment with high amplitude and high frequency noise across many channels">
+          <p>This is a bad recording segment. The high-amplitude and high-frequency portions immediately after the start and near the end should be rejected. Epochs selected for rejection should contain noise across most or all channels, should not be location-specific, and should be clearly noticeable. In this example, the participant may have started grinding their teeth or moving their jaw.</p>
+        </details>
+      </section>
+
+      <section id="channels">
+        <h2>Channel Rejection</h2>
+        <p>Channel rejection removes and interpolates abnormal channels.</p>
+        <p>Abnormal channels are identified using the following indicators:</p>
+        <ul>
+          <li>High standard deviation from the average 64-channel time series and spectral power.</li>
+          <li>High impedance (<code>&gt; 25 kOhms</code>).</li>
+          <li>Bridging, measured as a strong correlation between one channel time series and another.</li>
+        </ul>
+        <p>The preprocessing script flags abnormal channels automatically, but reviewer input is required when too many channels are flagged. Interpolating many channels is bad practice, especially when the flagged channels are clustered together, because this effectively creates data in that region.</p>
+        <p>When more than 15% of channels are flagged, the reviewer must decide whether to override the rejection step or mark the recording as unusable.</p>
+
+        <h3>Channel Rejection Examples</h3>
+        <details open class="workflow-details">
+          <summary>Reject / Flag</summary>
+          <table class="two-col-table">
+            <tr>
+              <td>
+                <img src="assets/pdf-images/eeg-qc-002.png" alt="Bad EEG channel example F8 with repeated amplitude jumps" width="420">
+                <strong>Bad channel example: F8</strong><br>
+                This is an example of a bad channel (<code>F8</code>). This image shows one time window, but repeated amplitude jumps are visible when scrolling through the full recording. The channel was likely not fixed securely to the cap or scalp and may have moved during recording.
+              </td>
+              <td>
+                <img src="assets/pdf-images/eeg-qc-003.png" alt="Bad EEG channel example FT9 with unrealistic amplitudes" width="420">
+                <strong>Bad channel example: FT9</strong><br>
+                <code>FT9</code> is another example of a bad channel. The amplitudes are not realistic, and the channel deviates strongly from the behavior of the other channels.
+              </td>
+            </tr>
+          </table>
+        </details>
+      </section>
+
+      <section id="ica">
+        <h2>ICA Artifact Rejection</h2>
+        <p>ICA artifact rejection removes eye and muscle artifacts from the data.</p>
+        <p>The preprocessing script generates independent components (ICs) and uses EEGLab's ICLabel algorithm to classify them. ICLabel assigns each component a class label and confidence percentage. Muscle and eye ICs above the pipeline threshold are flagged for review.</p>
+        <p>Reviewer input is especially important at this stage because fully automated ICA can over-reject data. To reduce this risk, the pipeline makes an initial decision, and the reviewer then checks all flagged components and either confirms or edits the selection.</p>
+        <p>When reviewing an IC, consider all of the following:</p>
+        <ul>
+          <li>Topography.</li>
+          <li>Time series.</li>
+          <li>Power spectrum.</li>
+        </ul>
+
+        <h3>Eye Artifacts</h3>
+        <p>Eye artifacts are usually the easiest ICs to identify because they have a consistent appearance across datasets.</p>
+        <details open class="workflow-details">
+          <summary>Eye artifact examples</summary>
+          <table class="two-col-table">
+            <tr>
+              <td>
+                <img src="assets/pdf-images/eeg-qc-004.png" alt="Horizontal eye movement ICA example" width="380">
+                <strong>Horizontal eye movements</strong><br>
+                Horizontal eye movements appear as opposing activation in the frontal electrodes of each hemisphere. They also have a smooth, decreasing power spectrum and longer-lasting blips in the trial plot.
+              </td>
+              <td>
+                <img src="assets/pdf-images/eeg-qc-005.png" alt="Blink ICA example" width="380">
+                <strong>Blinks</strong><br>
+                Blinks show activation in the frontal channels only. They have a smooth, decreasing power spectrum and appear as clear blips in the trial plot.
+              </td>
+            </tr>
+          </table>
+        </details>
+
+        <h3>Muscle Artifacts</h3>
+        <p>Muscle artifacts commonly appear in frontal and temporal channels, especially near the eyes, jaw, ears, and forehead. These artifacts are often reduced during ICA-based preprocessing, but the processed EEG should still be reviewed for residual contamination when many muscle-related ICs are identified.</p>
+        <p>Muscle artifacts are harder to identify than eye artifacts, so reviewers should be conservative. If it is unclear whether a component is muscle artifact, leave it in the data. It is better to keep a possible artifact than to over-reject, because ICA is not a perfect source separation method and every IC can still contain real brain activity.</p>
+        <p>Muscle artifacts can be identified using the following characteristics:</p>
+        <ul>
+          <li>They tend to appear around the eyes, ears, and jaw.</li>
+          <li>They sometimes look like a dipole.</li>
+          <li>They usually affect only a small number of electrodes.</li>
+          <li>The trial plot tends to look like static noise.</li>
+          <li>The power spectrum increases at higher frequencies because muscle artifacts are captured by approximately <code>20-50 Hz</code> activity.</li>
+        </ul>
+        <p>If these conditions are not met, the component generally should not be rejected.</p>
+        <p>This is especially important for beta- and gamma-band analyses. Muscle noise can contaminate these frequency bands, and apparent gamma activity may reflect muscle contamination rather than neural activity.</p>
+        <p>Flag recordings for exclusion or additional sensitivity analyses when they show any of the following:</p>
+        <ul>
+          <li>A large number of muscle-related ICs.</li>
+          <li>Residual high-frequency noise after ICA.</li>
+          <li>Disproportionate high-frequency activity in specific frontal or temporal channels.</li>
+        </ul>
+        <p>These recordings may require exclusion or additional sensitivity analyses before they are included in downstream EEG frequency analyses.</p>
+
+        <details class="workflow-details">
+          <summary>Muscle artifact examples</summary>
+          <table class="two-col-table">
+            <tr>
+              <td>
+                <img src="assets/pdf-images/eeg-qc-006.png" alt="Muscle artifact ICA example near the ear or jaw region" width="380">
+                <strong>Muscle artifact example 1</strong>
+              </td>
+              <td>
+                <img src="assets/pdf-images/eeg-qc-007.png" alt="Muscle artifact ICA example with high-frequency power increase" width="380">
+                <strong>Muscle artifact example 2</strong>
+              </td>
+            </tr>
+          </table>
+        </details>
+      </section>
+
+      <section id="sanity">
+        <h2>Additional Sanity Checks</h2>
+        <h3 class="sanity-subsection-title">Missing Impedance Values</h3>
+        <p>The <code>.vhdr</code> file should contain impedance values for all channels. Sometimes impedance values are missing because the system was disconnected during recording. When this happens, reviewers cannot determine whether impedance was too high, so the issue should be flagged.</p>
+        <details open class="workflow-details">
+          <summary>Missing-impedance example</summary>
+          <img class="example-image" src="assets/pdf-images/eeg-qc-000.png" alt="BrainVision header view showing no impedance values available" width="820">
+          <p class="caption">Example missing-impedance message: <strong>No impedance values available at 08:26:46!</strong></p>
+        </details>
+
+        <h3 class="sanity-subsection-title">Eyes-Open vs. Eyes-Closed Recordings</h3>
+        <p>Resting-state EEG recordings may be collected under either eyes-open or eyes-closed conditions. These recording types are physiologically distinct and should not be combined in the same analysis.</p>
+        <p>This protocol is designed for eyes-open resting-state EEG. Eyes-closed recordings are expected to be rare, but if one is identified, it should be flagged and excluded.</p>
+        <p>To identify possible eyes-closed recordings, inspect the raw time series for eye blinks. In eyes-open recordings, blink activity should usually be visible, especially in frontal channels. If blink activity is absent across the recording and the signal appears unusually flat or stable, the recording may have been collected with eyes closed and should be reviewed carefully.</p>
+      </section>
+
+      <section id="resources">
+        <h2>Helpful Resources</h2>
+        <p>The main toolboxes for EEG preprocessing are FieldTrip and EEGLab.</p>
+        <ul class="resource-list">
+          <li><a href="https://www.fieldtriptoolbox.org/tutorial/">FieldTrip tutorial for MATLAB users</a></li>
+          <li><a href="https://sccn.ucsd.edu/eeglab/download/eeglabtutorial4.2.pdf">EEGLab tutorial PDF</a></li>
+          <li><a href="https://eeglab.org/tutorials/">EEGLab tutorials</a><br>
+            The rs-EEG pipeline uses EEGLab.</li>
+          <li><strong>Mike X Cohen</strong><br>
+            Useful source for EEG-focused signal analysis. His materials focus more on analysis than preprocessing.</li>
+          <li><a href="https://docs.google.com/document/d/10Rvj0-LhDYRoRaD8N_zv_DT_DlLCnNtGqXTbCXcKCoM/edit?tab=t.0">BSL EEG Pre-Processing Pipeline for Eyes Open rsEEG</a></li>
+        </ul>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <p>Source content: <a href="EEG-QC-workflow.md">EEG-QC-workflow.md</a>. This page is a static companion for the EEG QC workflow.</p>
+    </footer>
+  </div>
+</body>
+</html>
