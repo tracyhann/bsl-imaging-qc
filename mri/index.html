@@ -32,6 +32,7 @@
     }
 
     body {
+      position: relative;
       margin: 0;
       color: var(--ink);
       background:
@@ -55,6 +56,19 @@
         linear-gradient(90deg, rgba(17, 103, 168, 0.07) 1px, transparent 1px);
       background-size: 34px 34px;
       mask-image: linear-gradient(to bottom, #000, transparent 78%);
+    }
+
+    body::after {
+      position: fixed;
+      top: 28px;
+      left: 28px;
+      z-index: 15;
+      width: min(340px, 42vw);
+      aspect-ratio: 768 / 292;
+      pointer-events: none;
+      background: url("../BSL logo.png") center / contain no-repeat;
+      content: "";
+      opacity: 0.16;
     }
 
     a {
@@ -82,6 +96,8 @@
     }
 
     .page {
+      position: relative;
+      z-index: 1;
       width: min(1180px, calc(100% - 36px));
       margin: 0 auto;
       padding: 28px 0 64px;
@@ -129,16 +145,6 @@
       font-weight: 900;
       letter-spacing: 0.02em;
       text-transform: uppercase;
-    }
-
-    .brand-mark {
-      width: 18px;
-      height: 18px;
-      border-radius: 6px;
-      background:
-        linear-gradient(135deg, var(--forest) 0 45%, transparent 45%),
-        linear-gradient(315deg, var(--teal) 0 46%, #8fb7cb 46%);
-      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.46);
     }
 
     .nav-links {
@@ -195,6 +201,11 @@
       border: 42px solid rgba(22, 123, 143, 0.13);
       border-radius: 50%;
       content: "";
+    }
+
+    .hero-copy > * {
+      position: relative;
+      z-index: 1;
     }
 
     .eyebrow {
@@ -489,7 +500,7 @@
   <a class="skip-link" href="#main">Skip to content</a>
   <div class="page">
     <nav class="top-nav" aria-label="Page sections">
-      <div class="brand"><span class="brand-mark" aria-hidden="true"></span> MRI QC Workflow</div>
+      <div class="brand">MRI QC Workflow</div>
       <div class="nav-links">
         <a href="#starting-file">Starting File</a>
         <a href="#output-file">Output File</a>
@@ -498,6 +509,7 @@
         <a href="#functional">Functional QC</a>
         <a href="#sanity">Sanity Checks</a>
         <a href="#summary">Summary</a>
+        <a href="#resources">Resources</a>
       </div>
     </nav>
 
@@ -920,6 +932,34 @@
               <li>QC additional sources of bias, such as scanner and software versioning, timestamp harmonization, etc.; document additional artifacts separately</li>
             </ul>
           </li>
+        </ul>
+      </section>
+
+      <section id="resources">
+        <h2>Helpful Resources</h2>
+        <ul class="resource-list">
+          <li><a href="https://ondemand.sherlock.stanford.edu/">Sherlock OnDemand</a><br>
+            Main access point for downloading Brains <code>fmriprep</code> reports, <code>figures/</code>, and other QC materials from the project directories.</li>
+          <li><a href="https://docs.google.com/spreadsheets/d/1eqrq1ljzznu_nocXYXM0Nf8Cn4K2-KJ1JJKNnd4yWcw/edit?usp=sharing">Data team Next Week's Data</a><br>
+            Internal data-team tracking sheet for data-quality issues observed during the trial, useful for cross-checking subject/session-specific notes and flagged concerns.</li>
+          <li><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC3254728/">MRI QC background paper</a><br>
+            Background reading on why MRI image-quality problems can create misleading findings and why QC matters for downstream inference.</li>
+          <li><a href="https://mriquestions.com/gibbs-artifact.html">Gibbs artifact reference</a><br>
+            MRIQuestions overview of Gibbs artifact / Gibbs ringing, useful when judging whether ringing compromises gray/white boundary detection.</li>
+          <li><a href="https://pubs.rsna.org/doi/full/10.1148/rg.210153">Hippocampal labeling reference 1</a><br>
+            Hippocampal labeling reference suggested in the Brains QC notes for reviewing medial temporal lobe anatomy and avoiding false positives during structural QC.</li>
+          <li><a href="https://insightsimaging.springeropen.com/articles/10.1007/s13244-016-0541-2">Hippocampal labeling reference 2</a><br>
+            Additional hippocampal labeling / anatomy reference suggested in the Brains QC notes for checking whether odd-looking medial temporal segmentations are expected.</li>
+          <li><a href="https://www.mriquestions.com/susceptibility-artifact.html">Susceptibility artifact reference</a><br>
+            MRIQuestions overview of susceptibility artifact, useful background for the frontal and inferior distortions checked during Brains functional QC.</li>
+          <li><a href="https://www.fieldtriptoolbox.org/faq/source/coordsys/">FieldTrip coordinate-system FAQ</a><br>
+            Coordinate-system reference relevant to the Brains issue where BOLD and fieldmaps were mislabeled in <code>ARS</code> vs <code>RPI</code>, breaking distortion correction.</li>
+          <li><a href="https://cni.su.domains/wiki/index.php?title=Main_Page">CNI Wiki main page</a><br>
+            CNI facility wiki with getting started materials, troubleshooting, MR hardware and protocols, data access, and QA-related pages.</li>
+          <li><a href="https://cni.su.domains/scan-data-acquired-from-august-2-11/">CNI facility news example: Scan Data Acquired From August 2-11</a><br>
+            CNI facility-news post from August 20, 2021 describing a coherent MR noise source that was traced to an environmental issue in the facility.</li>
+          <li><a href="https://cni.su.domains/scan-data-acquired-from-august-19-23/">CNI facility news example: Scan Data Acquired From August 19-23</a><br>
+            CNI facility-news post from August 26, 2021 documenting the August 17-18, 2021 scanner upgrade and the post-upgrade artifact issue that affected some sequences.</li>
         </ul>
       </section>
     </main>

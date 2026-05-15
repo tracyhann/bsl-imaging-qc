@@ -32,6 +32,7 @@
     }
 
     body {
+      position: relative;
       margin: 0;
       color: var(--ink);
       background:
@@ -55,6 +56,19 @@
         linear-gradient(90deg, rgba(17, 103, 168, 0.07) 1px, transparent 1px);
       background-size: 34px 34px;
       mask-image: linear-gradient(to bottom, #000, transparent 78%);
+    }
+
+    body::after {
+      position: fixed;
+      top: 28px;
+      left: 28px;
+      z-index: 15;
+      width: min(340px, 42vw);
+      aspect-ratio: 768 / 292;
+      pointer-events: none;
+      background: url("../BSL logo.png") center / contain no-repeat;
+      content: "";
+      opacity: 0.16;
     }
 
     a {
@@ -82,6 +96,8 @@
     }
 
     .page {
+      position: relative;
+      z-index: 1;
       width: min(1180px, calc(100% - 36px));
       margin: 0 auto;
       padding: 28px 0 64px;
@@ -129,16 +145,6 @@
       font-weight: 900;
       letter-spacing: 0.02em;
       text-transform: uppercase;
-    }
-
-    .brand-mark {
-      width: 18px;
-      height: 18px;
-      border-radius: 6px;
-      background:
-        linear-gradient(135deg, var(--forest) 0 45%, transparent 45%),
-        linear-gradient(315deg, var(--teal) 0 46%, #8fb7cb 46%);
-      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.46);
     }
 
     .nav-links {
@@ -190,6 +196,11 @@
       border: 42px solid rgba(22, 123, 143, 0.13);
       border-radius: 50%;
       content: "";
+    }
+
+    .hero-copy > * {
+      position: relative;
+      z-index: 1;
     }
 
     .eyebrow {
@@ -492,7 +503,7 @@
   <a class="skip-link" href="#main">Skip to content</a>
   <div class="page">
     <nav class="top-nav" aria-label="Page sections">
-      <div class="brand"><span class="brand-mark" aria-hidden="true"></span> EEG QC Workflow</div>
+      <div class="brand">EEG QC Workflow</div>
       <div class="nav-links">
         <a href="#required-files">Required Files</a>
         <a href="#exclusion-qc">Exclusion QC</a>

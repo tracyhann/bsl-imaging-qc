@@ -28,6 +28,7 @@
     }
 
     body {
+      position: relative;
       margin: 0;
       color: var(--ink);
       background:
@@ -61,6 +62,8 @@
     }
 
     .page {
+      position: relative;
+      z-index: 1;
       width: min(1320px, calc(100% - 36px));
       margin: 0 auto;
       padding: 28px 0 64px;
@@ -81,6 +84,19 @@
       background:
         linear-gradient(160deg, rgba(22, 123, 143, 0.1), rgba(255, 255, 255, 0.86) 42%),
         rgba(255, 255, 255, 0.9);
+    }
+
+    .hub-title-row {
+      display: flex;
+      align-items: center;
+      gap: clamp(18px, 4vw, 42px);
+    }
+
+    .hub-title-logo {
+      display: block;
+      flex: 0 1 min(260px, 24vw);
+      max-width: min(260px, 24vw);
+      height: auto;
     }
 
     .eyebrow {
@@ -212,6 +228,15 @@
         height: 820px;
         min-height: 640px;
       }
+
+      .hub-title-row {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .hub-title-logo {
+        max-width: min(220px, 62vw);
+      }
     }
   </style>
 </head>
@@ -220,7 +245,10 @@
     <div class="shell">
       <header class="hub-header">
         <p class="eyebrow">BSL QC Workflows</p>
-        <h1>QC Workflow Hub</h1>
+        <div class="hub-title-row">
+          <h1>QC Workflow Hub</h1>
+          <img class="hub-title-logo" src="BSL logo.png" alt="BSL logo">
+        </div>
         <p class="lead">A centralized static hub for reviewing the MRI and EEG QC workflows. Use the tabs to switch modalities without leaving the page, or open either workflow directly.</p>
       </header>
 
