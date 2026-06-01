@@ -167,7 +167,7 @@ This document summarizes a template for building an analysis-ready clean imaging
 
 - [Sherlock OnDemand](https://ondemand.sherlock.stanford.edu/)
   Sherlock OnDemand. This was the main access point for downloading `fmriprep` reports, `figures/`, and other QC materials from the Brains project directories.
-- [Data team Next Week's Data](https://docs.google.com/spreadsheets/d/1eqrq1ljzznu_nocXYXM0Nf8Cn4K2-KJ1JJKNnd4yWcw/edit?usp=sharing)
+- [Data team Next Week's Data](https://docs.google.com/spreadsheets/d/19XX4K6LOH8vimpAiRn8btXlF4cB4rJ2zvlaxLGOKz7E/edit?usp=sharing)
   Internal data-team tracking sheet documenting data-quality issues observed during the trial. Useful for cross-checking subject/session-specific notes alongside the structural QC review.
 - [MRI QC background paper](https://pmc.ncbi.nlm.nih.gov/articles/PMC3254728/)
   Background reading on why MRI image-quality problems can create misleading findings and why QC matters so much for downstream inference.
@@ -260,7 +260,7 @@ This document summarizes a template for building an analysis-ready clean imaging
 
 - [Sherlock OnDemand](https://ondemand.sherlock.stanford.edu/)
   Sherlock OnDemand. Used to access the Brains `fmriprep` HTML reports and associated `figures/` for manual BOLD QC.
-- [Data team Next Week's Data](https://docs.google.com/spreadsheets/d/1eqrq1ljzznu_nocXYXM0Nf8Cn4K2-KJ1JJKNnd4yWcw/edit?usp=sharing)
+- [Data team Next Week's Data](https://docs.google.com/spreadsheets/d/19XX4K6LOH8vimpAiRn8btXlF4cB4rJ2zvlaxLGOKz7E/edit?usp=sharing)
   Internal data-team tracking sheet documenting data-quality issues observed during the trial. Useful for checking session-level notes and flagged concerns while reviewing functional QC decisions.
 - [Susceptibility artifact reference](https://www.mriquestions.com/susceptibility-artifact.html)
   MRIQuestions overview of susceptibility artifact. Useful background for understanding the type of frontal and inferior distortions the Brains functional QC was checking.
