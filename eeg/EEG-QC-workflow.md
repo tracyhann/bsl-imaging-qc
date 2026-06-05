@@ -1,6 +1,6 @@
 # EEG QC Workflow
 
-This document summarizes the EEG QC workflow and organizes it in a format parallel to the imaging QC workflow.
+This guide summarizes the EEG QC workflow for eyes-open resting-state EEG, including required files, rejection criteria, sanity checks, and visual examples.
 
 ## Required Files
 
@@ -173,7 +173,7 @@ The `.vhdr` file should contain impedance values for all channels. Sometimes imp
 
 <img src="./assets/pdf-images/eeg-qc-000.png" alt="Example BrainVision header view showing no impedance values available" width="820"><br>
 
-Example of the missing-impedance issue: **No impedance values available at 08:26:46!**
+Example missing-impedance message: **No impedance values available at 08:26:46!**
 
 </details>
 
@@ -189,9 +189,12 @@ To identify possible eyes-closed recordings, inspect the raw time series for eye
 
 The main toolboxes for EEG preprocessing are FieldTrip and EEGLab.
 
-- FieldTrip tutorial for MATLAB users: https://www.fieldtriptoolbox.org/tutorial/
-- EEGLab tutorial PDF: https://sccn.ucsd.edu/eeglab/download/eeglabtutorial4.2.pdf
-- EEGLab tutorials: https://eeglab.org/tutorials/
-  - The rs-EEG pipeline uses EEGLab.
-- **Mike X Cohen** is a useful source for EEG-focused signal analysis. His materials focus more on analysis than preprocessing.
+- [FieldTrip tutorial for MATLAB users](https://www.fieldtriptoolbox.org/tutorial/)
+- [EEGLab tutorial PDF](https://sccn.ucsd.edu/eeglab/download/eeglabtutorial4.2.pdf)
+- [EEGLab tutorials](https://eeglab.org/tutorials/)
+  The rs-EEG pipeline uses EEGLab.
+- **Mike X Cohen**
+  Useful source for EEG-focused signal analysis. His materials focus more on analysis than preprocessing.
 - [BSL EEG Pre-Processing Pipeline for Eyes Open rsEEG](https://docs.google.com/document/d/10Rvj0-LhDYRoRaD8N_zv_DT_DlLCnNtGqXTbCXcKCoM/edit?tab=t.0)
+- [Recruitment Tracking Sheet](https://docs.google.com/spreadsheets/d/1hvjAztXkUSMyTgMj4K3OI33AxFAqFZEg6-EcusuIr2o/edit?usp=sharing)
+  Helpful resource for verifying screening ID, enrolled participant ID, and additional retreatment or OL ID with timestamps for scheduled visits. `fmriprep` reports, `figures/`, and other QC materials from the project directories.
