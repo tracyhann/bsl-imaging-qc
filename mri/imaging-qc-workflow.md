@@ -338,3 +338,30 @@ This document summarizes a template for building an analysis-ready clean imaging
   - run structural QC with explicit automated and manual rules
   - run functional QC to catch egregious preprocessing failures, especially distortion-correction errors
   - QC additional sources of bias, such as scanner and software versioning, timestamp harmonization, etc.; document additional artifacts separately
+
+## Helpful Resources
+
+- [Sherlock OnDemand](https://ondemand.sherlock.stanford.edu/)
+  Main access point for downloading Brains `fmriprep` reports, `figures/`, and other QC materials from the project directories.
+- [Data team Next Week's Data](https://docs.google.com/spreadsheets/d/19XX4K6LOH8vimpAiRn8btXlF4cB4rJ2zvlaxLGOKz7E/edit?usp=sharing)
+  Internal data-team tracking sheet for data-quality issues observed during the trial, useful for cross-checking subject/session-specific notes and flagged concerns.
+- [MRI QC background paper](https://pmc.ncbi.nlm.nih.gov/articles/PMC3254728/)
+  Background reading on why MRI image-quality problems can create misleading findings and why QC matters for downstream inference.
+- [Gibbs artifact reference](https://mriquestions.com/gibbs-artifact.html)
+  MRIQuestions overview of Gibbs artifact / Gibbs ringing, useful when judging whether ringing compromises gray/white boundary detection.
+- [Hippocampal labeling reference 1](https://pubs.rsna.org/doi/full/10.1148/rg.210153)
+  Hippocampal labeling reference suggested in the Brains QC notes for reviewing medial temporal lobe anatomy and avoiding false positives during structural QC.
+- [Hippocampal labeling reference 2](https://insightsimaging.springeropen.com/articles/10.1007/s13244-016-0541-2)
+  Additional hippocampal labeling / anatomy reference suggested in the Brains QC notes for checking whether odd-looking medial temporal segmentations are expected.
+- [Susceptibility artifact reference](https://www.mriquestions.com/susceptibility-artifact.html)
+  MRIQuestions overview of susceptibility artifact, useful background for the frontal and inferior distortions checked during Brains functional QC.
+- [FieldTrip coordinate-system FAQ](https://www.fieldtriptoolbox.org/faq/source/coordsys/)
+  Coordinate-system reference relevant to the Brains issue where BOLD and fieldmaps were mislabeled in `ARS` vs `RPI`, breaking distortion correction.
+- [CNI Wiki main page](https://cni.su.domains/wiki/index.php?title=Main_Page)
+  CNI facility wiki with getting started materials, troubleshooting, MR hardware and protocols, data access, and QA-related pages.
+- [CNI facility news example: Scan Data Acquired From August 2-11](https://cni.su.domains/scan-data-acquired-from-august-2-11/)
+  CNI facility-news post from August 20, 2021 describing a coherent MR noise source that was traced to an environmental issue in the facility.
+- [CNI facility news example: Scan Data Acquired From August 19-23](https://cni.su.domains/scan-data-acquired-from-august-19-23/)
+  CNI facility-news post from August 26, 2021 documenting the August 17-18, 2021 scanner upgrade and the post-upgrade artifact issue that affected some sequences.
+- [Recruitment Tracking Sheet](https://docs.google.com/spreadsheets/d/1hvjAztXkUSMyTgMj4K3OI33AxFAqFZEg6-EcusuIr2o/edit?usp=sharing)
+  Helpful resource for verifying screening ID, enrolled participant ID, and additional retreatment or OL ID with timestamps for scheduled visits. `fmriprep` reports, `figures/`, and other QC materials from the project directories.
